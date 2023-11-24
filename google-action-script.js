@@ -7,25 +7,50 @@ function createIssue(e){
 // Assign variables to the form data submitted by the requestor from the spreadsheet associated with the Google form.
 // NOTE: Update the [n] to the cell value in your spreadsheet.
 // Timestamp	Email Address	RFE Title	Due Date	Link to hubspot
-var requesterEmail = e.values[2];
-var title = e.values[3];
+
+
+var email = e.values[1];
+var title = e.values[2];
+var description = e.values[3];
+var hubspotUrl = JSON.stringify(e.values[4])
+var dueDate = e.values[5];
+var formattedDate = Utilities.formatDate(new Date(dueDate), "GMT", "yyyy-MM-dd");
+var extraUrl = e.values[6];
+
+
 
 //
 // The dueDate variable requires a formatting update in order that JIRA accepts it
 // Date format becomes YYYY-MM-DD, and is called later in the data posted to the API
 // 
-var dueDate = e.values[5];
-var formattedDate = Utilities.formatDate(new Date(dueDate), "GMT", "yyyy-MM-dd");
+
+
 //
 // Contact names
 //
 //
 // Assign variable to your instance JIRA API URL
 //
-  var url = "https://keyless.atlassian.net/rest/api/3/issue";
+  var url = "https://<your instance here>.atlassian.net/rest/api/3/issue";
 //
 // The POST data for the JIRA API call
 // Timestamp	Email Address	RFE Title	Due Date	Link to hubspot
+//
+// Timestamp	
+// Email Address	
+// Title for you request	
+// Due Date  (wishful desired date for outcome)	
+// Link to Hubspot	
+// Description of your request for enhancement. Be as detailed as you can.	
+// Add extra Hubspot links or other resources you feel necessary to qualify the RFE.	
+// Attach a file that was not possible to include in the Hubspot documents section							
+//
+//       "reporter": { "name": email },
+//      I
+
+// The following custom fields are for the various strings and are simple text fields in JIRA
+// You can find all the custom fields by looking here: https://<YOUR_JIRA_INSTANCE>.atlassian.net/rest/api/latest/field/
+//    
 
 
   var data = 
@@ -37,9 +62,6 @@ var formattedDate = Utilities.formatDate(new Date(dueDate), "GMT", "yyyy-MM-dd")
        "priority": {
           "name": "Low"
        },
-      "duedate": formattedDate,
-      "summary": "<Text>" + e.values[6],
-      "assignee": { "name": requesterEmail },
       "description": {
             "type": "doc",
             "version": 1,
@@ -49,28 +71,29 @@ var formattedDate = Utilities.formatDate(new Date(dueDate), "GMT", "yyyy-MM-dd")
                     "content": [
                         {
                             "type": "text",
-                            "text": "<text>- " + e.values[2] + " <text> " + "\n" + "<text> " + e.values[5] + "\n"
+                            "text": description + "\n"
                         }
                    ]
                 }
             ]
         },
-//
-// The following custom fields are for the various strings and are simple text fields in JIRA
-// You can find all the custom fields by looking here: https://<YOUR_JIRA_INSTANCE>.atlassian.net/rest/api/latest/field/
-//    
-
-//
-//
+      "customfield_10307": extraUrl,
+      "duedate": formattedDate,
+      "customfield_10308": hubspotUrl,
+      "summary": title,
       "issuetype":{
           "name": "Story"
        }
    }
 };
+
+
 //
 // Turn all the post data into a JSON string to be sent to the API
 //
+
   var payload = JSON.stringify(data);
+
 //
 // POST header information, including authorization information.  
 // This API call is linked to an account in JIRA, and follows the Basic Authentication method ("username:password" are Base64 encoded)
